@@ -35,7 +35,7 @@ namespace Potyogós_amőba.Model
         {
             _dataAccess = dataAccess;
             //_tabla = new PotyogosTable();
-            _aktualisJatekos = Mezo.JatekosX;
+            _aktualisJatekos = Mezo.PlayerX;
             _timer = timer;
 
             _timer.Interval = 1000;
@@ -55,7 +55,7 @@ namespace Potyogós_amőba.Model
         public void NewGame(int meret)
         {
             _tabla = new PotyogosTable(meret);
-            _aktualisJatekos = Mezo.JatekosX;
+            _aktualisJatekos = Mezo.PlayerX;
             _lepesek = 0;
             _jatekIdoX = 0;
             _jatekIdoO = 0;
@@ -64,13 +64,13 @@ namespace Potyogós_amőba.Model
 
         private void SwitchPlayer()
         {
-            if (_aktualisJatekos == Mezo.JatekosX)
+            if (_aktualisJatekos == Mezo.PlayerX)
             {
-                _aktualisJatekos = Mezo.JatekosO;
+                _aktualisJatekos = Mezo.PlayerO;
             }
             else
             {
-                _aktualisJatekos = Mezo.JatekosX;
+                _aktualisJatekos = Mezo.PlayerX;
             }
         }
         // Egy oszlopba dobás logikája
@@ -97,7 +97,7 @@ namespace Potyogós_amőba.Model
                     GameOver?.Invoke(this, new PotyogosEventArgs(
                         true,
                         _aktualisJatekos,
-                        _aktualisJatekos == Mezo.JatekosX ? _jatekIdoX : _jatekIdoO,
+                        _aktualisJatekos == Mezo.PlayerX ? _jatekIdoX : _jatekIdoO,
                         winningCells
                     ));
                     return;
@@ -119,7 +119,7 @@ namespace Potyogós_amőba.Model
         public async Task LoadGameAsync(string path)
         {
             _tabla = await _dataAccess.LoadAsync(path);
-            _aktualisJatekos = Mezo.JatekosX;
+            _aktualisJatekos = Mezo.PlayerX;
             _lepesek = 0;
             _jatekIdoX = 0;
             _jatekIdoO = 0;
@@ -130,7 +130,7 @@ namespace Potyogós_amőba.Model
             _tabla = table;
             _jatekIdoX = jatekIdoX;
             _jatekIdoO = jatekIdoO;
-            _aktualisJatekos = Mezo.JatekosX;
+            _aktualisJatekos = Mezo.PlayerX;
             _timer.Start();
 
             // UI frissítéshez esemény kiváltása
@@ -410,7 +410,7 @@ namespace Potyogós_amőba.Model
 
         private void OnGameRefresh()
         {
-            GameRefresh?.Invoke(this, new PotyogosEventArgs(false, _aktualisJatekos, _aktualisJatekos == Mezo.JatekosX ? _jatekIdoX : _jatekIdoO));
+            GameRefresh?.Invoke(this, new PotyogosEventArgs(false, _aktualisJatekos, _aktualisJatekos == Mezo.PlayerX ? _jatekIdoX : _jatekIdoO));
         }
 
         private void OnFieldChanged(Int32 x, Int32 y,Mezo jatekos)
@@ -423,7 +423,7 @@ namespace Potyogós_amőba.Model
             if (JatekVege) // ha már vége, nem folytathatjuk
                 return;
 
-            if (_aktualisJatekos == Mezo.JatekosO)
+            if (_aktualisJatekos == Mezo.PlayerO)
             {
                 _jatekIdoO++;
             }

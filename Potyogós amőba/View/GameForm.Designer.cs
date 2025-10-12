@@ -31,8 +31,8 @@
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             újJátékToolStripMenuItem = new ToolStripMenuItem();
-            játékSzüneteltetéséreToolStripMenuItem = new ToolStripMenuItem();
-            játékMentéséreToolStripMenuItem = new ToolStripMenuItem();
+            pauseGameToolStripMenuItem = new ToolStripMenuItem();
+            saveGameToolStripMenuItem = new ToolStripMenuItem();
             betöltéséreToolStripMenuItem = new ToolStripMenuItem();
             colorDialog1 = new ColorDialog();
             menuStrip1.SuspendLayout();
@@ -50,7 +50,7 @@
             // 
             // fileToolStripMenuItem
             // 
-            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { újJátékToolStripMenuItem, játékSzüneteltetéséreToolStripMenuItem, játékMentéséreToolStripMenuItem, betöltéséreToolStripMenuItem });
+            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { újJátékToolStripMenuItem, pauseGameToolStripMenuItem, saveGameToolStripMenuItem, betöltéséreToolStripMenuItem });
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             fileToolStripMenuItem.Size = new Size(46, 24);
             fileToolStripMenuItem.Text = "File";
@@ -61,23 +61,23 @@
             újJátékToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.N;
             újJátékToolStripMenuItem.Size = new Size(265, 26);
             újJátékToolStripMenuItem.Text = "Új játék";
-            újJátékToolStripMenuItem.Click += újJátékToolStripMenuItem_Click;
+            újJátékToolStripMenuItem.Click += newGameToolStripMenuItem_Click;
             // 
             // játékSzüneteltetéséreToolStripMenuItem
             // 
-            játékSzüneteltetéséreToolStripMenuItem.Name = "játékSzüneteltetéséreToolStripMenuItem";
-            játékSzüneteltetéséreToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.P;
-            játékSzüneteltetéséreToolStripMenuItem.Size = new Size(265, 26);
-            játékSzüneteltetéséreToolStripMenuItem.Text = "Játék szüneteltetés";
-            játékSzüneteltetéséreToolStripMenuItem.Click += játékSzüneteltetéséreToolStripMenuItem_Click;
+            pauseGameToolStripMenuItem.Name = "játékSzüneteltetéséreToolStripMenuItem";
+            pauseGameToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.P;
+            pauseGameToolStripMenuItem.Size = new Size(265, 26);
+            pauseGameToolStripMenuItem.Text = "Játék szüneteltetés";
+            pauseGameToolStripMenuItem.Click += pauseGameToolStripMenuItem_Click;
             // 
             // játékMentéséreToolStripMenuItem
             // 
-            játékMentéséreToolStripMenuItem.Name = "játékMentéséreToolStripMenuItem";
-            játékMentéséreToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.S;
-            játékMentéséreToolStripMenuItem.Size = new Size(265, 26);
-            játékMentéséreToolStripMenuItem.Text = "Játék mentés";
-            játékMentéséreToolStripMenuItem.Click += játékMentéséreToolStripMenuItem_Click;
+            saveGameToolStripMenuItem.Name = "játékMentéséreToolStripMenuItem";
+            saveGameToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.S;
+            saveGameToolStripMenuItem.Size = new Size(265, 26);
+            saveGameToolStripMenuItem.Text = "Játék mentés";
+            saveGameToolStripMenuItem.Click += saveGameToolStripMenuItem_Click;
             // 
             // betöltéséreToolStripMenuItem
             // 
@@ -85,7 +85,7 @@
             betöltéséreToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.L;
             betöltéséreToolStripMenuItem.Size = new Size(265, 26);
             betöltéséreToolStripMenuItem.Text = "Játék betöltés";
-            betöltéséreToolStripMenuItem.Click += betöltéséreToolStripMenuItem_Click;
+            betöltéséreToolStripMenuItem.Click += loadGameToolStripMenuItem_Click;
             // 
             // GameForm
             // 
@@ -108,8 +108,8 @@
         private MenuStrip menuStrip1;
         private ToolStripMenuItem fileToolStripMenuItem;
         private ToolStripMenuItem újJátékToolStripMenuItem;
-        private ToolStripMenuItem játékSzüneteltetéséreToolStripMenuItem;
-        private ToolStripMenuItem játékMentéséreToolStripMenuItem;
+        private ToolStripMenuItem pauseGameToolStripMenuItem;
+        private ToolStripMenuItem saveGameToolStripMenuItem;
         private ToolStripMenuItem betöltéséreToolStripMenuItem;
         private ColorDialog colorDialog1;
     }

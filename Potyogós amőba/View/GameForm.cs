@@ -6,30 +6,30 @@ namespace Potyogós_amőba
 {
     public partial class GameForm : Form
     {
-        #region Adattagok
-        private Int32 meret; //a tabla merete
-        private Button[] dobalo = null!;
-        private TextBox[,] palya = null!;
+        #region Fields
+        private Int32 _boardSize; //a tabla merete
+        private Button[] _dropButtons = null!;
+        private TextBox[,] _board = null!;
         private PotyogosGameModel _gameModel;
-        private Label[] jatekosokIdeje = null!;
+        private Label[] _playerTimers = null!;
         #endregion
 
         #region Constructor
         public GameForm()
         {
-            meret = 0;
+            _boardSize = 0;
             InitializeComponent();
             _gameModel = new PotyogosGameModel(new PotyogosFileDataAccess(), new PotygosTimerAggregation());
             _gameModel.GameRefresh += new EventHandler<PotyogosEventArgs>(Game_GameRefresh);
             _gameModel.FieldChanged += new EventHandler<PotyogosFieldEventArgs>(Game_FieldChanged);
             _gameModel.GameOver += new EventHandler<PotyogosEventArgs>(Game_GameOver);
 
-            játékMentéséreToolStripMenuItem.Enabled = false;
-            játékSzüneteltetéséreToolStripMenuItem.Enabled = false;
+            saveGameToolStripMenuItem.Enabled = false;
+            pauseGameToolStripMenuItem.Enabled = false;
         }
         #endregion
 
-        private void játékSzüneteltetéséreToolStripMenuItem_Click(object sender, EventArgs e)
+        private void pauseGameToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_gameModel == null)  // még nincs játék
                 return;
@@ -47,7 +47,7 @@ namespace Potyogós_amőba
             {
                 // játék fut → most állítsuk le
                 _gameModel.PauseGame();
-                menu.Text = "Folytatas";
+                menu.Text = "Folytatás";
                 menu.Tag = true;
             }
             else
@@ -61,21 +61,21 @@ namespace Potyogós_amőba
 
         private void Game_GameOver(Object? sender, PotyogosEventArgs e)
         {
-            foreach (Button button in dobalo)
+            foreach (Button button in _dropButtons)
                 button.Enabled = false;
 
-            játékMentéséreToolStripMenuItem.Enabled = false;
+            saveGameToolStripMenuItem.Enabled = false;
 
             if (e.IsWon)
             {
-                // 🔥 nyerő mezők megjelölése
+                // nyerő mezők megjelölése
                 foreach (var (x, y) in e.WinningCells)
                 {
-                    palya[x, y].BackColor = Color.LightCoral;
+                    _board[x, y].BackColor = Color.LightCoral;
                 }
 
                 MessageBox.Show(
-                    $"Gratulálok, győztél!\nJátékos: {(e.CurrantPlayer == Mezo.JatekosX ? "X" : "O")}",
+                    $"Gratulálok, győztél!\nJátékos: {(e.CurrantPlayer == Mezo.PlayerX ? "X" : "O")}",
                     "Potyogós amőba",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Asterisk
@@ -91,48 +91,48 @@ namespace Potyogós_amőba
         }
 
 
-        private void újJátékToolStripMenuItem_Click(object sender, EventArgs e)
+        private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
-                if (palya != null)
+                if (_board != null)
                 {
-                    foreach (var button in palya)
+                    foreach (var button in _board)
                     {
                         this.Controls.Remove(button);
                         button.Dispose();
                     }
-                    palya = null!;
+                    _board = null!;
                 }
-                if (dobalo != null)
+                if (_dropButtons != null)
                 {
-                    foreach (var gomb in dobalo)
+                    foreach (var gomb in _dropButtons)
                     {
                         this.Controls.Remove(gomb);
                         gomb.Dispose();
                     }
                 }
                 string valasz = Interaction.InputBox("give me the size of table:", "New game", "");
-                meret = Int32.Parse(valasz);
-                if (meret > 18 || meret < 4) { throw new ArgumentException("Your number is to big"); }
+                _boardSize = Int32.Parse(valasz);
+                if (_boardSize > 18 || _boardSize < 4) { throw new ArgumentException("Your number is to big"); }
 
-                if (jatekosokIdeje != null)
+                if (_playerTimers != null)
                 {
-                    for (int i = 0; i < jatekosokIdeje.Length; i++)
+                    for (int i = 0; i < _playerTimers.Length; i++)
                     {
-                        if (jatekosokIdeje[i] != null)
+                        if (_playerTimers[i] != null)
                         {
-                            this.Controls.Remove(jatekosokIdeje[i]);
-                            jatekosokIdeje[i].Dispose();
+                            this.Controls.Remove(_playerTimers[i]);
+                            _playerTimers[i].Dispose();
                         }
                     }
                 }
                 GenerateTable();
                 GernerateLabel();
-                _gameModel.NewGame(meret);
+                _gameModel.NewGame(_boardSize);
 
-                játékMentéséreToolStripMenuItem.Enabled = true;
-                játékSzüneteltetéséreToolStripMenuItem.Enabled = true;
+                saveGameToolStripMenuItem.Enabled = true;
+                pauseGameToolStripMenuItem.Enabled = true;
             }
             catch (Exception)
             {
@@ -143,19 +143,19 @@ namespace Potyogós_amőba
         }
         private void RefreshBoard()
         {
-            for (int i = 0; i < meret; i++)
+            for (int i = 0; i < _boardSize; i++)
             {
-                for (int j = 0; j < meret; j++)
+                for (int j = 0; j < _boardSize; j++)
                 {
                     Mezo ertek = _gameModel.GetValue(i, j);
-                    palya[i, j].Text = ertek == Mezo.JatekosX ? "X" :
-                                       ertek == Mezo.JatekosO ? "O" : "";
+                    _board[i, j].Text = ertek == Mezo.PlayerX ? "X" :
+                                       ertek == Mezo.PlayerO ? "O" : "";
                 }
             }
 
             // időcímkék frissítése (ha vannak)
-            jatekosokIdeje[0].Text = "X: ";
-            jatekosokIdeje[1].Text = "O: ";
+            _playerTimers[0].Text = "X: ";
+            _playerTimers[1].Text = "O: ";
 
         }
 
@@ -166,58 +166,58 @@ namespace Potyogós_amőba
         private void GenerateTable()
         {
             // a dobalo letrehozasa
-            dobalo = new Button[meret];
-            for (Int32 i = 0; i < meret; i++)
+            _dropButtons = new Button[_boardSize];
+            for (Int32 i = 0; i < _boardSize; i++)
             {
-                dobalo[i] = new Button();
-                dobalo[i].Location = new Point(5 + 50 * i, 35);
-                dobalo[i].Size = new Size(50, 50);
-                dobalo[i].Font = new Font(FontFamily.GenericSansSerif, 25, FontStyle.Bold);
-                dobalo[i].TabIndex = i;
-                dobalo[i].FlatStyle = FlatStyle.Flat;
-                dobalo[i].MouseClick += new MouseEventHandler(Dobalo_Click);
+                _dropButtons[i] = new Button();
+                _dropButtons[i].Location = new Point(5 + 50 * i, 35);
+                _dropButtons[i].Size = new Size(50, 50);
+                _dropButtons[i].Font = new Font(FontFamily.GenericSansSerif, 25, FontStyle.Bold);
+                _dropButtons[i].TabIndex = i;
+                _dropButtons[i].FlatStyle = FlatStyle.Flat;
+                _dropButtons[i].MouseClick += new MouseEventHandler(dropButtons_Click);
 
-                Controls.Add(dobalo[i]);
+                Controls.Add(_dropButtons[i]);
             }
 
-            palya = new TextBox[meret, meret];
-            for (Int32 i = 0; i < meret; i++)
+            _board = new TextBox[_boardSize, _boardSize];
+            for (Int32 i = 0; i < _boardSize; i++)
             {
-                for (Int32 j = 0; j < meret; j++)
+                for (Int32 j = 0; j < _boardSize; j++)
                 {
-                    palya[i, j] = new TextBox();
-                    palya[i, j].Location = new Point(5 + 50 * j, 85 + 50 * i);
-                    palya[i, j].Size = new Size(50, 50);
-                    palya[i, j].Enabled = false;
-                    palya[i, j].BackColor = Color.LightBlue;
-                    palya[i, j].Font = new Font(FontFamily.GenericSansSerif, 25, FontStyle.Bold);
-                    palya[i, j].TabIndex = meret * i + j + meret;
-                    palya[i, j].MouseClick += new MouseEventHandler(Dobalo_Click);
+                    _board[i, j] = new TextBox();
+                    _board[i, j].Location = new Point(5 + 50 * j, 85 + 50 * i);
+                    _board[i, j].Size = new Size(50, 50);
+                    _board[i, j].Enabled = false;
+                    _board[i, j].BackColor = Color.LightBlue;
+                    _board[i, j].Font = new Font(FontFamily.GenericSansSerif, 25, FontStyle.Bold);
+                    _board[i, j].TabIndex = _boardSize * i + j + _boardSize;
+                    _board[i, j].MouseClick += new MouseEventHandler(dropButtons_Click);
 
-                    Controls.Add(palya[i, j]);
+                    Controls.Add(_board[i, j]);
                 }
             }
         }
         private void GernerateLabel()
         {
-            jatekosokIdeje = new Label[2];
+            _playerTimers = new Label[2];
             for (int i = 0; i < 2; i++)
             {
-                jatekosokIdeje[i] = new Label();
-                jatekosokIdeje[i].Location = new Point(50 + 50 * meret, 50 + 100 * i);
-                jatekosokIdeje[i].Size = new Size(300, 50);
-                jatekosokIdeje[i].Font = new Font(FontFamily.GenericSansSerif, 25, FontStyle.Bold);
-                jatekosokIdeje[i].TabIndex = 10000 + i;
+                _playerTimers[i] = new Label();
+                _playerTimers[i].Location = new Point(50 + 50 * _boardSize, 50 + 100 * i);
+                _playerTimers[i].Size = new Size(300, 50);
+                _playerTimers[i].Font = new Font(FontFamily.GenericSansSerif, 25, FontStyle.Bold);
+                _playerTimers[i].TabIndex = 10000 + i;
 
-                Controls.Add(jatekosokIdeje[i]);
+                Controls.Add(_playerTimers[i]);
             }
-            jatekosokIdeje[0].Text = "X: ";
-            jatekosokIdeje[1].Text = "O: ";
+            _playerTimers[0].Text = "X: ";
+            _playerTimers[1].Text = "O: ";
 
         }
         private void Game_FieldChanged(Object? sender, PotyogosFieldEventArgs e)
         {
-            palya[e.X, e.Y].Text = e.jatekos == Mezo.JatekosX ? "X" : "O";
+            _board[e.X, e.Y].Text = e.jatekos == Mezo.PlayerX ? "X" : "O";
         }
         private void Game_GameRefresh(Object? sender, PotyogosEventArgs e)
         {
@@ -227,16 +227,16 @@ namespace Potyogós_amőba
                 return;
             }
             //idő felirat frissités
-            int curentP = e.CurrantPlayer == Mezo.JatekosX ? 0 : 1;
-            jatekosokIdeje[curentP].Text = jatekosokIdeje[curentP].Text.Substring(0, 3)
+            int curentP = e.CurrantPlayer == Mezo.PlayerX ? 0 : 1;
+            _playerTimers[curentP].Text = _playerTimers[curentP].Text.Substring(0, 3)
                 + TimeSpan.FromSeconds(e.GameTime).ToString(@"mm\:ss");
 
-            jatekosokIdeje[curentP].BackColor = Color.HotPink;//aktuális játékos
-            jatekosokIdeje[e.CurrantPlayer == Mezo.JatekosX ? 1 : 0].BackColor = SystemColors.Control;//másik játékos
+            _playerTimers[curentP].BackColor = Color.HotPink;//aktuális játékos
+            _playerTimers[e.CurrantPlayer == Mezo.PlayerX ? 1 : 0].BackColor = SystemColors.Control;//másik játékos
 
         }
 
-        private void Dobalo_Click(object? sender, MouseEventArgs e)
+        private void dropButtons_Click(object? sender, MouseEventArgs e)
         {
             int oszlop = (sender as Button)?.TabIndex ?? 0;
             _gameModel.DropToken(oszlop);
@@ -245,11 +245,11 @@ namespace Potyogós_amőba
         private void GameForm_Load(object sender, EventArgs e)
         {
             // amikor elindul az alkalmazás, még nincs játék
-            játékMentéséreToolStripMenuItem.Enabled = false;
-            játékSzüneteltetéséreToolStripMenuItem.Enabled = false;
+            saveGameToolStripMenuItem.Enabled = false;
+            pauseGameToolStripMenuItem.Enabled = false;
         }
 
-        private async void játékMentéséreToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void saveGameToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_gameModel == null) return;
 
@@ -273,7 +273,7 @@ namespace Potyogós_amőba
             }
         }
 
-        private  async void betöltéséreToolStripMenuItem_Click(object sender, EventArgs e)
+        private  async void loadGameToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
@@ -285,33 +285,33 @@ namespace Potyogós_amőba
                     try
                     {
                         await _gameModel.LoadGameAsync(openFileDialog.FileName);
-                        meret = _gameModel.TablaMeret;
+                        _boardSize = _gameModel.TablaMeret;
 
                         // új tábla felrajzolása
-                        if (palya != null)
+                        if (_board != null)
                         {
-                            foreach (var box in palya)
+                            foreach (var box in _board)
                             {
                                 this.Controls.Remove(box);
                                 box.Dispose();
                             }
                         }
-                        if (dobalo != null)
+                        if (_dropButtons != null)
                         {
-                            foreach (var button in dobalo)
+                            foreach (var button in _dropButtons)
                             {
                                 this.Controls.Remove(button);
                                 button.Dispose();
                             }
                         }
-                        if (jatekosokIdeje != null)
+                        if (_playerTimers != null)
                         {
-                            for (int i = 0; i < jatekosokIdeje.Length; i++)
+                            for (int i = 0; i < _playerTimers.Length; i++)
                             {
-                                if (jatekosokIdeje[i] != null)
+                                if (_playerTimers[i] != null)
                                 {
-                                    this.Controls.Remove(jatekosokIdeje[i]);
-                                    jatekosokIdeje[i].Dispose();
+                                    this.Controls.Remove(_playerTimers[i]);
+                                    _playerTimers[i].Dispose();
                                 }
                             }
                         }
@@ -319,8 +319,8 @@ namespace Potyogós_amőba
                         GernerateLabel();
                         RefreshBoard();
 
-                        játékMentéséreToolStripMenuItem.Enabled = true;
-                        játékSzüneteltetéséreToolStripMenuItem.Enabled = true;
+                        saveGameToolStripMenuItem.Enabled = true;
+                        pauseGameToolStripMenuItem.Enabled = true;
 
                         MessageBox.Show("Game loaded successfully!", "Potyogós Amőba", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }

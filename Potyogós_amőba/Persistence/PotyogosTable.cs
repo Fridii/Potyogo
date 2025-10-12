@@ -9,8 +9,8 @@ namespace Potyogós_amőba.Persistence
     public enum Mezo
     {
         Ures = 0,
-        JatekosX = 1,
-        JatekosO = 2
+        PlayerX = 1,
+        PlayerO = 2
     }
     public class PotyogosTable
     {
