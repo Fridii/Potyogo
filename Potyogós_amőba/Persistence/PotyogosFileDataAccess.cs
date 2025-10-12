@@ -32,8 +32,8 @@ namespace Potyogós_amőba.Persistence
                             int val = Int32.Parse(ertekek[j]);
                             if (val >= 0 && val <= 2)
                             {
-                                table.AddElement(j, (Mezo)val);
-                                table.SetValue(i, j, (Mezo)val);
+                                table.AddElement(j, (Field)val);
+                                table.SetValue(i, j, (Field)val);
                             }
                             else
                             {
@@ -58,10 +58,10 @@ namespace Potyogós_amőba.Persistence
                 {
                     // Játékidők
                     await writer.WriteLineAsync(_jatekIdoX + " " + _jatekIdoO);
-                    await writer.WriteLineAsync(table.Meret + "");
-                    for (int i = 0; i < table.Meret; i++)  // fentről lefelé vagy
+                    await writer.WriteLineAsync(table.Size + "");
+                    for (int i = 0; i < table.Size; i++)  // fentről lefelé vagy
                     {
-                        for (int j = 0; j < table.Meret; j++)
+                        for (int j = 0; j < table.Size; j++)
                         {
                             await writer.WriteAsync(((int)table[i, j]).ToString() + " ");
                         }

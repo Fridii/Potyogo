@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Potyogós_amőba.Persistence
 {       
-    public enum Mezo
+    public enum Field
     {
         Ures = 0,
         PlayerX = 1,
@@ -15,7 +15,7 @@ namespace Potyogós_amőba.Persistence
     public class PotyogosTable
     {
         
-        private Mezo[,] tablaErtekei;
+        private Field[,] tablaErtekei;
 
         public Boolean IsFilled
         {
@@ -28,12 +28,12 @@ namespace Potyogós_amőba.Persistence
             }
         }
 
-        public Int32 Meret
+        public Int32 Size
         {
             get { return tablaErtekei.GetLength(0); }
         }
 
-        public Mezo this[Int32 x, Int32 y]
+        public Field this[Int32 x, Int32 y]
         {
             get { return GetValue(x, y); }
         }
@@ -41,7 +41,7 @@ namespace Potyogós_amőba.Persistence
         //public PotyogosTable() : this(4) { }
         public PotyogosTable(Int32 meret)
         {
-            tablaErtekei = new Mezo[meret, meret];
+            tablaErtekei = new Field[meret, meret];
         }
 
         public Boolean IsEmpty(Int32 x, Int32 y)
@@ -54,7 +54,7 @@ namespace Potyogós_amőba.Persistence
             return tablaErtekei[x, y] == 0;
         }
 
-        public Mezo GetValue(Int32 x, Int32 y)
+        public Field GetValue(Int32 x, Int32 y)
         {
             if (x < 0 || x >= tablaErtekei.GetLength(0))
                 throw new ArgumentOutOfRangeException(nameof(x), "The X coordinate is out of range.");
@@ -64,7 +64,7 @@ namespace Potyogós_amőba.Persistence
             return tablaErtekei[x, y];
         }
 
-        public void AddElement(Int32 oszlop, Mezo ertek)
+        public void AddElement(Int32 oszlop, Field ertek)
         {
             if (oszlop < 0 || oszlop >= tablaErtekei.GetLength(0))
                 throw new ArgumentOutOfRangeException(nameof(oszlop), "The X coordinate is out of range.");
@@ -98,9 +98,9 @@ namespace Potyogós_amőba.Persistence
             }
            
         }*/
-        public void SetValue(int sor, int oszlop, Mezo ertek)
+        public void SetValue(int sor, int oszlop, Field ertek)
         {
-            if (sor < 0 || sor >= Meret || oszlop < 0 || oszlop >= Meret)
+            if (sor < 0 || sor >= Size || oszlop < 0 || oszlop >= Size)
                 throw new ArgumentOutOfRangeException();
             tablaErtekei[sor, oszlop] = ertek;
         }
@@ -109,7 +109,7 @@ namespace Potyogós_amőba.Persistence
         {
             for (Int32 i = tablaErtekei.GetLength(1) - 1; i > -1 ; i--)
             {
-                if (tablaErtekei[i, oszlop] == Mezo.Ures)
+                if (tablaErtekei[i, oszlop] == Field.Ures)
                     return i;
             }
             return -1;

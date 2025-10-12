@@ -10,7 +10,7 @@ namespace Potyogós_amőba.Model
     public class PotyogosEventArgs : EventArgs
     {
         private Int32 _jatekosIdo;
-        private Mezo _currantPlayer;
+        private Field _currantPlayer;
         private Boolean _nyert;
         private List<(int X, int Y)> _winningCells;
 
@@ -22,7 +22,7 @@ namespace Potyogós_amőba.Model
         /// <summary>
         /// Játéklépések számának lekérdezése.
         /// </summary>
-        public Mezo CurrantPlayer { get { return _currantPlayer; } }
+        public Field CurrantPlayer { get { return _currantPlayer; } }
 
         /// <summary>
         /// Győzelem lekérdezése.
@@ -36,7 +36,7 @@ namespace Potyogós_amőba.Model
         /// <param name="isWon">Győzelem lekérdezése.</param>
         /// <param name="gameStepCount">Lépésszám.</param>
         /// <param name="gameTime">Játékidő.</param>
-        public PotyogosEventArgs(Boolean nyert, Mezo currantPlayer, Int32 jatekIdo, List<(int X, int Y)> winningCells = null!)
+        public PotyogosEventArgs(Boolean nyert, Field currantPlayer, Int32 jatekIdo, List<(int X, int Y)> winningCells = null!)
         {
             _nyert = nyert;
             _currantPlayer = currantPlayer;

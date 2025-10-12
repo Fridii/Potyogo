@@ -12,30 +12,30 @@ namespace Potyogós_amőba.Model
     public class PotyogosGameModel
     {
         private IPotyogosDataAccess _dataAccess;
-        private PotyogosTable _tabla = null!;
-        private Mezo _aktualisJatekos;
+        private PotyogosTable _table = null!;
+        private Field _currentPlayer;
         private ITimer _timer;
-        private int _jatekIdoX;
-        private int _jatekIdoO;
-        private int _lepesek;
+        private int _PlayerTimeX;
+        private int _PlayerTimeO;
+        private int _steps;
 
         public event EventHandler<PotyogosFieldEventArgs>? FieldChanged;
         public event EventHandler<PotyogosEventArgs>? GameRefresh;
         public event EventHandler<PotyogosEventArgs>? GameOver;
 
 
-        public Int32 TablaMeret => _tabla.Meret;
-        public Mezo this[int x, int y] => _tabla[x, y];
-        public bool JatekVege => _tabla.IsFilled ;//todo: ha valaki nyert
-        public int JatekIdoX => _jatekIdoX;
-        public int JatekIdoO => _jatekIdoO;
+        public Int32 TableSize => _table.Size;
+        public Field this[int x, int y] => _table[x, y];
+        public bool isGameOver => _table.IsFilled ;//todo: ha valaki nyert
+        public int PlayerTimeX => _PlayerTimeX;
+        public int PlayerTimeO => _PlayerTimeO;
 
 
         public PotyogosGameModel(IPotyogosDataAccess dataAccess, ITimer timer)
         {
             _dataAccess = dataAccess;
             //_tabla = new PotyogosTable();
-            _aktualisJatekos = Mezo.PlayerX;
+            _currentPlayer = Field.PlayerX;
             _timer = timer;
 
             _timer.Interval = 1000;
@@ -48,47 +48,47 @@ namespace Potyogós_amőba.Model
 
         public void ResumeGame()
         {
-            if (!_tabla.IsFilled && !JatekVege)
+            if (!_table.IsFilled && !isGameOver)
                 _timer.Start();
         }
 
         public void NewGame(int meret)
         {
-            _tabla = new PotyogosTable(meret);
-            _aktualisJatekos = Mezo.PlayerX;
-            _lepesek = 0;
-            _jatekIdoX = 0;
-            _jatekIdoO = 0;
+            _table = new PotyogosTable(meret);
+            _currentPlayer = Field.PlayerX;
+            _steps = 0;
+            _PlayerTimeX = 0;
+            _PlayerTimeO = 0;
             _timer.Start();
         }
 
         private void SwitchPlayer()
         {
-            if (_aktualisJatekos == Mezo.PlayerX)
+            if (_currentPlayer == Field.PlayerX)
             {
-                _aktualisJatekos = Mezo.PlayerO;
+                _currentPlayer = Field.PlayerO;
             }
             else
             {
-                _aktualisJatekos = Mezo.PlayerX;
+                _currentPlayer = Field.PlayerX;
             }
         }
         // Egy oszlopba dobás logikája
         public void DropToken(Int32 oszlop)
         {
-            if (JatekVege)
+            if (isGameOver)
                 return ;
 
             try
             {
-                Int32 sor = _tabla.EmptySpot(oszlop);
+                Int32 sor = _table.EmptySpot(oszlop);
                 if (sor == -1)
                     return; // ha tele van az oszlop
 
-                _tabla.AddElement(oszlop, _aktualisJatekos);
-                _lepesek++;
+                _table.AddElement(oszlop, _currentPlayer);
+                _steps++;
 
-                OnFieldChanged(sor, oszlop, _aktualisJatekos);
+                OnFieldChanged(sor, oszlop, _currentPlayer);
 
                 var winningCells = CheckWin(sor, oszlop);
                 if (winningCells.Count >= 4)
@@ -96,8 +96,8 @@ namespace Potyogós_amőba.Model
                     StopTimers();
                     GameOver?.Invoke(this, new PotyogosEventArgs(
                         true,
-                        _aktualisJatekos,
-                        _aktualisJatekos == Mezo.PlayerX ? _jatekIdoX : _jatekIdoO,
+                        _currentPlayer,
+                        _currentPlayer == Field.PlayerX ? _PlayerTimeX : _PlayerTimeO,
                         winningCells
                     ));
                     return;
@@ -112,25 +112,25 @@ namespace Potyogós_amőba.Model
         }
         public async Task SaveGameAsync(string path)
         {
-            await _dataAccess.SaveAsync(path, _tabla , _jatekIdoX, _jatekIdoO);
+            await _dataAccess.SaveAsync(path, _table , _PlayerTimeX, _PlayerTimeO);
         }
 
         // Betöltés
         public async Task LoadGameAsync(string path)
         {
-            _tabla = await _dataAccess.LoadAsync(path);
-            _aktualisJatekos = Mezo.PlayerX;
-            _lepesek = 0;
-            _jatekIdoX = 0;
-            _jatekIdoO = 0;
+            _table = await _dataAccess.LoadAsync(path);
+            _currentPlayer = Field.PlayerX;
+            _steps = 0;
+            _PlayerTimeX = 0;
+            _PlayerTimeO = 0;
             _timer.Start();
         }
         public void LoadTableAndTimes(PotyogosTable table, int jatekIdoX, int jatekIdoO)
         {
-            _tabla = table;
-            _jatekIdoX = jatekIdoX;
-            _jatekIdoO = jatekIdoO;
-            _aktualisJatekos = Mezo.PlayerX;
+            _table = table;
+            _PlayerTimeX = jatekIdoX;
+            _PlayerTimeO = jatekIdoO;
+            _currentPlayer = Field.PlayerX;
             _timer.Start();
 
             // UI frissítéshez esemény kiváltása
@@ -142,31 +142,31 @@ namespace Potyogós_amőba.Model
             _timer.Stop();
         }
 
-        private bool helpWinSor(int kezdet, int veg, int sor)
+        private bool helpWinRow(int kezdet, int veg, int sor)
         {
-            int szamlalo = 0;
+            int count = 0;
             for (int i = kezdet; i <= veg; i++)
             {
-                if (_tabla[sor, i] != _aktualisJatekos) // Ha az érték nem egyezik az aktuális játékoséval
+                if (_table[sor, i] != _currentPlayer) // Ha az érték nem egyezik az aktuális játékoséval
                 {
-                    szamlalo = 0; // Számláló visszaállítása
+                    count = 0; // Számláló visszaállítása
                 }
                 else
                 {
-                    szamlalo++; // Számláló növelése
-                    if (szamlalo == 4) return true; // Ha 4 egymás után van, nyerés
+                    count++; // Számláló növelése
+                    if (count == 4) return true; // Ha 4 egymás után van, nyerés
                 }
             }
             return false; // Ha nincs 4 egymás után
         }
 
 
-        private bool helpWinOszlop(int kezdet, int veg, int oszlop)
+        private bool helpWinColumn(int kezdet, int veg, int oszlop)
         {
             int szamlalo = 0;
             for (int i = kezdet; i <= veg; i++)
             {
-                if (_tabla[i, oszlop] != _aktualisJatekos) // Ha az érték nem egyezik az aktuális játékoséval
+                if (_table[i, oszlop] != _currentPlayer) // Ha az érték nem egyezik az aktuális játékoséval
                 {
                     szamlalo = 0; // Számláló visszaállítása
                 }
@@ -180,12 +180,12 @@ namespace Potyogós_amőba.Model
         }
 
         // Segédfüggvény a főátló ellenőrzésére
-        private bool helpWinFoAtlo(int startSor, int startOszlop, int endSor, int endOszlop)
+        private bool helpWinMainDiagonal(int startSor, int startOszlop, int endSor, int endOszlop)
         {
             int count = 1; // Kezdőérték
             for (int i = 1; startSor + i <= endSor && startOszlop + i <= endOszlop; i++)
             {
-                if (_tabla[startSor + i, startOszlop + i] == _tabla[startSor + i - 1, startOszlop + i - 1])
+                if (_table[startSor + i, startOszlop + i] == _table[startSor + i - 1, startOszlop + i - 1])
                 {
                     count++;
                     if (count == 4) return true; // Ha 4 egymás után van, nyerés
@@ -199,12 +199,12 @@ namespace Potyogós_amőba.Model
         }
 
         // Segédfüggvény a mellékátló ellenőrzésére
-        private bool helpWinMellekAtlo(int startSor, int startOszlop, int endSor, int endOszlop)
+        private bool helpWinSideDiagonal(int startSor, int startOszlop, int endSor, int endOszlop)
         {
             int count = 1; // Kezdőérték
             for (int i = 1; startSor + i <= endSor && startOszlop - i >= endOszlop; i++)
             {
-                if (_tabla[startSor + i, startOszlop - i] == _tabla[startSor + i - 1, startOszlop - i + 1])
+                if (_table[startSor + i, startOszlop - i] == _table[startSor + i - 1, startOszlop - i + 1])
                 {
                     count++;
                     if (count == 4) return true; // Ha 4 egymás után van, nyerés
@@ -228,14 +228,14 @@ namespace Potyogós_amőba.Model
 
             foreach (var (dSor, dOszlop) in directions)
             {
-                var cells = EllenorizIranyKoordinata(sor, oszlop, dSor, dOszlop);
+                var cells = CheckDirectionCoordinate(sor, oszlop, dSor, dOszlop);
                 if (cells.Count >= 4)
                     return cells;
             }
 
             return new List<(int X, int Y)>(); // nincs nyerés
         }
-        private List<(int X, int Y)> EllenorizIranyKoordinata(int sor, int oszlop, int dSor, int dOszlop)
+        private List<(int X, int Y)> CheckDirectionCoordinate(int sor, int oszlop, int dSor, int dOszlop)
         {
             List<(int X, int Y)> cells = new() { (sor, oszlop) };
 
@@ -255,9 +255,9 @@ namespace Potyogós_amőba.Model
             int ujSor = sor + dSor;
             int ujOszlop = oszlop + dOszlop;
 
-            while (ujSor >= 0 && ujSor < _tabla.Meret &&
-                   ujOszlop >= 0 && ujOszlop < _tabla.Meret &&
-                   _tabla[ujSor, ujOszlop] == _aktualisJatekos)
+            while (ujSor >= 0 && ujSor < _table.Size &&
+                   ujOszlop >= 0 && ujOszlop < _table.Size &&
+                   _table[ujSor, ujOszlop] == _currentPlayer)
             {
                 cells.Add((ujSor, ujOszlop));
                 ujSor += dSor;
@@ -273,10 +273,10 @@ namespace Potyogós_amőba.Model
            
 
             // négy irány: vízszintes, függőleges, főátló, mellékátló
-            return EllenorizIrany(sor, oszlop, 0, 1 )   // vízszintes →
-                || EllenorizIrany(sor, oszlop, 1, 0 )   // függőleges ↓
-                || EllenorizIrany(sor, oszlop, 1, 1 )   // főátló ↘
-                || EllenorizIrany(sor, oszlop, 1, -1 ); // mellékátló ↙
+            return CheckDirection(sor, oszlop, 0, 1 )   // vízszintes →
+                || CheckDirection(sor, oszlop, 1, 0 )   // függőleges ↓
+                || CheckDirection(sor, oszlop, 1, 1 )   // főátló ↘
+                || CheckDirection(sor, oszlop, 1, -1 ); // mellékátló ↙
             /*if (_lepesek > 7 && !_tabla.IsFilled)
             {
                 //sor ellenorzes
@@ -330,7 +330,7 @@ namespace Potyogós_amőba.Model
             }
             return false;*/
         }
-        private bool EllenorizIrany(int sor, int oszlop, int dSor, int dOszlop)
+        private bool CheckDirection(int sor, int oszlop, int dSor, int dOszlop)
         {
             int count = 1; // maga a most lerakott bábu
 
@@ -349,9 +349,9 @@ namespace Potyogós_amőba.Model
             int ujSor = sor + dSor;
             int ujOszlop = oszlop + dOszlop;
 
-            while (ujSor >= 0 && ujSor < _tabla.Meret &&
-                   ujOszlop >= 0 && ujOszlop < _tabla.Meret &&
-                   _tabla[ujSor, ujOszlop] == _aktualisJatekos)
+            while (ujSor >= 0 && ujSor < _table.Size &&
+                   ujOszlop >= 0 && ujOszlop < _table.Size &&
+                   _table[ujSor, ujOszlop] == _currentPlayer)
             {
                 db++;
                 ujSor += dSor;
@@ -361,9 +361,9 @@ namespace Potyogós_amőba.Model
             return db;
         }
 
-        public Mezo GetValue(Int32 x, Int32 y) => _tabla.GetValue(x, y);
+        public Field GetValue(Int32 x, Int32 y) => _table.GetValue(x, y);
 
-        public Boolean IsEmpty(Int32 x, Int32 y) => _tabla.IsEmpty(x, y);
+        public Boolean IsEmpty(Int32 x, Int32 y) => _table.IsEmpty(x, y);
 
 
 
@@ -410,26 +410,26 @@ namespace Potyogós_amőba.Model
 
         private void OnGameRefresh()
         {
-            GameRefresh?.Invoke(this, new PotyogosEventArgs(false, _aktualisJatekos, _aktualisJatekos == Mezo.PlayerX ? _jatekIdoX : _jatekIdoO));
+            GameRefresh?.Invoke(this, new PotyogosEventArgs(false, _currentPlayer, _currentPlayer == Field.PlayerX ? _PlayerTimeX : _PlayerTimeO));
         }
 
-        private void OnFieldChanged(Int32 x, Int32 y,Mezo jatekos)
+        private void OnFieldChanged(Int32 x, Int32 y,Field jatekos)
         {
             FieldChanged?.Invoke(this, new PotyogosFieldEventArgs(x,y,jatekos));
         }
 
         private void Timer_Elapsed(Object? sender, EventArgs e)
         {
-            if (JatekVege) // ha már vége, nem folytathatjuk
+            if (isGameOver) // ha már vége, nem folytathatjuk
                 return;
 
-            if (_aktualisJatekos == Mezo.PlayerO)
+            if (_currentPlayer == Field.PlayerO)
             {
-                _jatekIdoO++;
+                _PlayerTimeO++;
             }
             else
             {
-                _jatekIdoX++;
+                _PlayerTimeX++;
             }
             OnGameRefresh();
         }
