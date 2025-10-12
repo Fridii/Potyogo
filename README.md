@@ -1,0 +1,1 @@
+# potyogos amoba teljes
