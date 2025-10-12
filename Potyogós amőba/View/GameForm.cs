@@ -262,7 +262,7 @@ namespace Potyogós_amőba
         /// </summary>
         private void Game_FieldChanged(Object? sender, PotyogosFieldEventArgs e)
         {
-            _board[e.X, e.Y].Text = e.jatekos == Field.PlayerX ? "X" : "O";
+            _board[e.X, e.Y].Text = e.player == Field.PlayerX ? "X" : "O";
         }
 
         /// <summary>
@@ -371,8 +371,8 @@ namespace Potyogós_amőba
 
                 Controls.Add(_playerTimers[i]);
             }
-            _playerTimers[0].Text = "X: ";
-            _playerTimers[1].Text = "O: ";
+            _playerTimers[0].Text = "X: "+TimeSpan.FromSeconds(0).ToString(@"mm\:ss");
+            _playerTimers[1].Text = "O: " + TimeSpan.FromSeconds(0).ToString(@"mm\:ss");
         }
         #endregion
     }

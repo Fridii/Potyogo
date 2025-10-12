@@ -12,13 +12,13 @@ namespace Potyogós_amőba.Model
     {
         public Int32 X { get; }
         public Int32 Y { get; }
-        public Field jatekos { get; }
+        public Field player { get; }
 
         public PotyogosFieldEventArgs(Int32 x, Int32 y, Field jatekos)
         {
             X = x;
             Y = y;
-            this.jatekos = jatekos;
+            this.player = jatekos;
         }
     }
 }

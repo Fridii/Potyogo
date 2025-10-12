@@ -9,6 +9,6 @@ namespace Potyogós_amőba.Persistence
     public interface IPotyogosDataAccess
     {       
         Task<PotyogosTable> LoadAsync(String path);
-        Task SaveAsync(String path, PotyogosTable table, int _jatekIdoX, int _jatekIdoO);
+        Task SaveAsync(String path, PotyogosTable table, int _playerTimeX, int _playerTimeO);
     }
 }
