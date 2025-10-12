@@ -51,6 +51,11 @@ namespace Potyogós_amőba.Model
         /// A tábla méretét adja vissza.
         /// </summary>
         public Int32 TableSize => _table.Size;
+        
+        /// <summary>
+        /// Az aktuális játékost adja vissza.
+        /// </summary>
+        public Field CurrentPlayer => _currentPlayer;
 
         /// <summary>
         /// Indexelő, amely visszaadja az adott mező értékét.

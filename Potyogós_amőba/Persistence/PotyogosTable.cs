@@ -32,7 +32,7 @@ namespace Potyogós_amőba.Persistence
     {
         #region Fields
 
-        private Field[,] tablaErtekei;
+        private Field[,] tableOfValues;
 
         #endregion
 
@@ -45,7 +45,7 @@ namespace Potyogós_amőba.Persistence
         {
             get
             {
-                foreach (Int32 ertek in tablaErtekei)
+                foreach (Int32 ertek in tableOfValues)
                     if (ertek == 0)
                         return false;
                 return true;
@@ -57,7 +57,7 @@ namespace Potyogós_amőba.Persistence
         /// </summary>
         public Int32 Size
         {
-            get { return tablaErtekei.GetLength(0); }
+            get { return tableOfValues.GetLength(0); }
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Potyogós_amőba.Persistence
         /// <param name="meret">A tábla mérete (n x n).</param>
         public PotyogosTable(Int32 meret)
         {
-            tablaErtekei = new Field[meret, meret];
+            tableOfValues = new Field[meret, meret];
         }
 
         #endregion
@@ -96,12 +96,12 @@ namespace Potyogós_amőba.Persistence
         /// <exception cref="ArgumentOutOfRangeException">Ha az x vagy y kívül esik a tábla határain.</exception>
         public Boolean IsEmpty(Int32 x, Int32 y)
         {
-            if (x < 0 || x >= tablaErtekei.GetLength(0))
+            if (x < 0 || x >= tableOfValues.GetLength(0))
                 throw new ArgumentOutOfRangeException(nameof(x), "The X coordinate is out of range.");
-            if (y < 0 || y >= tablaErtekei.GetLength(1))
+            if (y < 0 || y >= tableOfValues.GetLength(1))
                 throw new ArgumentOutOfRangeException(nameof(y), "The Y coordinate is out of range.");
 
-            return tablaErtekei[x, y] == 0;
+            return tableOfValues[x, y] == 0;
         }
 
         /// <summary>
@@ -113,30 +113,30 @@ namespace Potyogós_amőba.Persistence
         /// <exception cref="ArgumentOutOfRangeException">Ha az x vagy y kívül esik a tábla határain.</exception>
         public Field GetValue(Int32 x, Int32 y)
         {
-            if (x < 0 || x >= tablaErtekei.GetLength(0))
+            if (x < 0 || x >= tableOfValues.GetLength(0))
                 throw new ArgumentOutOfRangeException(nameof(x), "The X coordinate is out of range.");
-            if (y < 0 || y >= tablaErtekei.GetLength(1))
+            if (y < 0 || y >= tableOfValues.GetLength(1))
                 throw new ArgumentOutOfRangeException(nameof(y), "The Y coordinate is out of range.");
 
-            return tablaErtekei[x, y];
+            return tableOfValues[x, y];
         }
 
         /// <summary>
         /// Bábu hozzáadása az oszlop legalsó üres helyére.
         /// </summary>
-        /// <param name="oszlop">Oszlop index.</param>
-        /// <param name="ertek">Hely értéke (X vagy O).</param>
+        /// <param name="column">Oszlop index.</param>
+        /// <param name="value">Hely értéke (X vagy O).</param>
         /// <exception cref="ArgumentOutOfRangeException">Ha az oszlop kívül esik a tábla határain.</exception>
         /// <exception cref="InvalidOperationException">Ha az oszlop már tele van.</exception>
-        public void AddElement(Int32 oszlop, Field ertek)
+        public void AddElement(Int32 column, Field value)
         {
-            if (oszlop < 0 || oszlop >= tablaErtekei.GetLength(0))
-                throw new ArgumentOutOfRangeException(nameof(oszlop), "The X coordinate is out of range.");
+            if (column < 0 || column >= tableOfValues.GetLength(0))
+                throw new ArgumentOutOfRangeException(nameof(column), "The X coordinate is out of range.");
 
-            int uresHely = EmptySpot(oszlop);
+            int uresHely = EmptySpot(column);
             if (uresHely != -1)
             {
-                tablaErtekei[uresHely, oszlop] = ertek;
+                tableOfValues[uresHely, column] = value;
             }
             else
             {
@@ -147,27 +147,27 @@ namespace Potyogós_amőba.Persistence
         /// <summary>
         /// Mező értékének beállítása adott sorban és oszlopban.
         /// </summary>
-        /// <param name="sor">Sor index.</param>
-        /// <param name="oszlop">Oszlop index.</param>
-        /// <param name="ertek">Beállítandó érték.</param>
+        /// <param name="row">Sor index.</param>
+        /// <param name="column">Oszlop index.</param>
+        /// <param name="value">Beállítandó érték.</param>
         /// <exception cref="ArgumentOutOfRangeException">Ha a sor vagy oszlop kívül esik a tábla határain.</exception>
-        public void SetValue(int sor, int oszlop, Field ertek)
+        public void SetValue(int row, int column, Field value)
         {
-            if (sor < 0 || sor >= Size || oszlop < 0 || oszlop >= Size)
+            if (row < 0 || row >= Size || column < 0 || column >= Size)
                 throw new ArgumentOutOfRangeException();
-            tablaErtekei[sor, oszlop] = ertek;
+            tableOfValues[row, column] = value;
         }
 
         /// <summary>
         /// Visszaadja az oszlop legalsó üres helyének sor indexét.
         /// </summary>
-        /// <param name="oszlop">Oszlop index.</param>
+        /// <param name="column">Oszlop index.</param>
         /// <returns>Legalsó üres sor index, -1 ha az oszlop tele van.</returns>
-        public Int32 EmptySpot(Int32 oszlop)
+        public Int32 EmptySpot(Int32 column)
         {
-            for (Int32 i = tablaErtekei.GetLength(1) - 1; i > -1; i--)
+            for (Int32 i = tableOfValues.GetLength(1) - 1; i > -1; i--)
             {
-                if (tablaErtekei[i, oszlop] == Field.Ures)
+                if (tableOfValues[i, column] == Field.Ures)
                     return i;
             }
             return -1;
