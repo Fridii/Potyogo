@@ -14,7 +14,7 @@ namespace Potyogós_amőba.Test
         [TestInitialize]
         public void Initialize()
         {
-            _mockedTable = new PotyogosTable(9);
+            _mockedTable = new PotyogosTable(9,10,31);
             _mockedTable.AddElement( 2, Field.PlayerX);
             _mockedTable.AddElement(1,  Field.PlayerO);
             _mockedTable.AddElement(2,  Field.PlayerX);
@@ -27,128 +27,97 @@ namespace Potyogós_amőba.Test
             _model = new PotyogosGameModel(_mock.Object, _mockedTimer);
             // példányosítjuk a modellt a mock objektummal
 
-            _model.GameRefresh += new EventHandler<PotyogosEventArgs>(Model_GameAdvanced);
+            _model.GameRefresh += new EventHandler<PotyogosEventArgs>(Model_GameRefresh);
             _model.GameOver += new EventHandler<PotyogosEventArgs>(Model_GameOver);
         }
 
 
-        [TestMethod]
-        public void SudokuGameModelNewGameMediumTest()
-        {
-            _model.NewGame();
+        
 
-            Assert.AreEqual(0, _model.GameStepCount); // még nem léptünk
-            Assert.AreEqual(GameDifficulty.Medium, _model.GameDifficulty); // a nehézség beállítódott
-            Assert.AreEqual(1200, _model.GameTime); // alapból ennyi időnk van
+      
+        [TestMethod]
+        public void PotyogosGameModelNewGame()
+        {
+            Int32 size = 5;
+            _model.NewGame(size);
+
+            Assert.AreEqual(size, _model.TableSize); 
+            Assert.AreEqual(_model.CurrentPlayer, Field.PlayerX); 
+            Assert.AreEqual(0, _model.PlayerTimeX); 
+            Assert.AreEqual(0, _model.PlayerTimeO); 
 
             Int32 emptyFields = 0;
-            for (Int32 i = 0; i < 9; i++)
-                for (Int32 j = 0; j < 9; j++)
+            for (Int32 i = 0; i < size; i++)
+                for (Int32 j = 0; j < size; j++)
                     if (_model.IsEmpty(i, j))
                         emptyFields++;
 
-            Assert.AreEqual(69, emptyFields); // szabad mezők száma is megfelelő
+            Assert.AreEqual(25, emptyFields); // szabad mezők száma is megfelelő
         }
 
         [TestMethod]
-        public void SudokuGameModelNewGameEasyTest()
+        public void PotyogosGameModelDropToken()
         {
-            _model.GameDifficulty = GameDifficulty.Easy;
-            _model.NewGame();
+            Assert.AreEqual(Field.PlayerX ,  _model.CurrentPlayer); 
 
-            Assert.AreEqual(0, _model.GameStepCount); // még nem léptünk
-            Assert.AreEqual(GameDifficulty.Easy, _model.GameDifficulty); // a nehézség beállítódott
-            Assert.AreEqual(3600, _model.GameTime); // alapból ennyi időnk van
+            _model.DropToken(2);
 
-            Int32 emptyFields = 0;
-            for (Int32 i = 0; i < 9; i++)
-                for (Int32 j = 0; j < 9; j++)
-                    if (_model.IsEmpty(i, j))
-                        emptyFields++;
+            Assert.AreEqual(Field.PlayerX, _model.CurrentPlayer); // mivel a játék áll, nem szabad, hogy lépjünk
+            
 
-            Assert.AreEqual(75, emptyFields); // szabad mezők száma is megfelelő
-        }
-
-        [TestMethod]
-        public void SudokuGameModelNewGameHardTest()
-        {
-            _model.GameDifficulty = GameDifficulty.Hard;
-            _model.NewGame();
-
-            Assert.AreEqual(0, _model.GameStepCount); // még nem léptünk
-            Assert.AreEqual(GameDifficulty.Hard, _model.GameDifficulty); // a nehézség beállítódott
-            Assert.AreEqual(600, _model.GameTime); // alapból ennyi időnk van
-
-            Int32 emptyFields = 0;
-            for (Int32 i = 0; i < 9; i++)
-                for (Int32 j = 0; j < 9; j++)
-                    if (_model.IsEmpty(i, j))
-                        emptyFields++;
-
-            Assert.AreEqual(63, emptyFields); // szabad mezők száma is megfelelő
-        }
-
-        [TestMethod]
-        public void SudokuGameModelStepTest()
-        {
-            Assert.AreEqual(0, _model.GameStepCount); // még nem léptünk
-
-            _model.Step(0, 0);
-
-            Assert.AreEqual(0, _model.GameStepCount); // mivel a játék áll, nem szabad, hogy lépjünk
-
-            _model.NewGame();
+            _model.NewGame(9);
 
             Random random = new Random();
-            Int32 x = 0, y = 0;
+            Int32 y = 0;int x = 8;
             do
             {
-                x = random.Next(0, 9);
                 y = random.Next(0, 9);
-            } while (!_model.IsEmpty(x, y));
+            } while (!_model.IsEmpty(x,y));
 
-            _model.Step(x, y);
+            _model.DropToken(y);
 
-            Assert.AreEqual(1, _model.GameStepCount); // most már léptünk
-            Assert.AreNotEqual(0, _model[x, y]); // kitöltöttnek kell lennie
-            Assert.AreEqual(1200, _model.GameTime); // az idő viszont nem változott
+            Assert.AreEqual(Field.PlayerO, _model.CurrentPlayer); // most már léptünk
+            Assert.AreNotEqual(Field.Ures, _model[x, y]); // kitöltöttnek kell lennie
 
-            Int32 currentValue = 1;
-            for (Int32 i = 2; i < 1E6; i++) // egymillió lépés végrehajtása
+            Assert.AreEqual(0, _model.PlayerTimeX); // az idő viszont nem változott
+            Assert.AreEqual(0, _model.PlayerTimeO);
+
+            
+            for ( ; x>0; x--) // további 8 lépés végrehajtása
             {
-                _model.Step(x, y);
-                Assert.IsTrue(currentValue < _model[x, y] || _model[x, y] == 0);
-                // az értékeknek ciklikusan kell váltakozniuk
-                Assert.AreEqual(i, _model.GameStepCount); // akárhányszor léphetünk a mezőre
-
-                currentValue = _model[x, y];
+                _model.DropToken(y);
+                Assert.IsTrue(_model[x, y] == _model.CurrentPlayer); // mindig az aktuális játékos léphet a mezőre 
             }
+
+            _model.DropToken(y);
+            Assert.AreEqual(_model[x+1,y], Field.PlayerO);// továbbra is az O kell jojjon mert a 10. lépés helytelen volt (teli oszlop)
         }
 
         [TestMethod]
-        public void SudokuGameModelAdvanceTimeTest()
+        public void PotyogosGameModelGameRefresh()
         {
-            _model.NewGame();
+            _model.NewGame(5);
 
-            Int32 time = _model.GameTime;
-            while (!_model.IsGameOver)
+            Int32 time = _model.PlayerTimeX;
+            while (time<10)
             {
                 _mockedTimer.RaiseElapsed();
 
-                time--;
+                time++;
 
-                Assert.AreEqual(time, _model.GameTime); // az idő csökkent
-                Assert.AreEqual(0, _model.GameStepCount); // de a lépésszám nem változott
+                Assert.AreEqual(time, _model.PlayerTimeX); // az idő csökkent
+                Assert.AreEqual(Field.PlayerX, _model.CurrentPlayer); // de a játékos nem változott
+                Assert.AreEqual(0, _model.PlayerTimeO); // másik játékos ideje nem változott
             }
+            
 
-            Assert.AreEqual(0, _model.GameTime); // a játék végére elfogyott a játékidő
         }
 
         [TestMethod]
-        public async Task SudokuGameModelLoadTest()
+        public async Task PotyogosGameModelLoadTest()
         {
             // kezdünk egy új játékot
-            _model.NewGame();
+            _model.NewGame(9);
 
             // majd betöltünk egy játékot
             await _model.LoadGameAsync(String.Empty);
@@ -158,28 +127,28 @@ namespace Potyogós_amőba.Test
                 {
                     Assert.AreEqual(_mockedTable.GetValue(i, j), _model.GetValue(i, j));
                     // ellenőrizzük, valamennyi mező értéke megfelelő-e
-                    Assert.AreEqual(_mockedTable.IsLocked(i, j), _model.IsLocked(i, j));
-                    // ellenőrizzük, valamennyi mező zároltsága megfelelő-e
+                   
                 }
 
-            // a lépésszám 0-ra áll vissza
-            Assert.AreEqual(0, _model.GameStepCount);
+            // az idő is bállítodik
+            Assert.AreEqual(_mockedTable.PlayerStartTimeX, _model.PlayerTimeX);
+            Assert.AreEqual(_mockedTable.PlayerStartTimeO, _model.PlayerTimeO);
 
             // ellenőrizzük, hogy meghívták-e a Load műveletet a megadott paraméterrel
             _mock.Verify(dataAccess => dataAccess.LoadAsync(String.Empty), Times.Once());
         }
 
-        private void Model_GameAdvanced(Object? sender, PotyogosEventArgs e)
+        private void Model_GameRefresh(Object? sender, PotyogosEventArgs e)
         {
             Assert.AreEqual(e.CurrantPlayer, _model.CurrentPlayer); // a két értéknek egyeznie kell
             Assert.AreEqual(e.GameTime, _model.CurrentPlayer==Field.PlayerX ? _model.PlayerTimeX : _model.PlayerTimeO); // a két értéknek egyeznie kell
-            Assert.IsFalse(e.IsWon); // még nem nyerték meg a játékot
+       
         }
 
         private void Model_GameOver(Object? sender, PotyogosEventArgs e)
         {
+            _model.NewGame(9);
             Assert.IsTrue(_model.isGameOver); // biztosan vége van a játéknak
-            Assert.AreEqual(0, e.GameTime); // a tesztben csak akkor váltódhat ki, ha elfogy az idő
             
         }
     }

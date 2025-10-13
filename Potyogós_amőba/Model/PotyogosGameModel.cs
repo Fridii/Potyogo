@@ -79,6 +79,14 @@ namespace Potyogós_amőba.Model
         /// </summary>
         public int PlayerTimeO => _PlayerTimeO;
 
+        public PotyogosFieldEventArgs PotyogosFieldEventArgs
+        {
+            get => default;
+            set
+            {
+            }
+        }
+
         #endregion
 
         #region Constructor
@@ -125,7 +133,7 @@ namespace Potyogós_amőba.Model
         /// <param name="meret">A tábla mérete.</param>
         public void NewGame(int meret)
         {
-            _table = new PotyogosTable(meret);
+            _table = new PotyogosTable(meret,0,0);
             _currentPlayer = Field.PlayerX;
             _steps = 0;
             _PlayerTimeX = 0;
@@ -136,14 +144,17 @@ namespace Potyogós_amőba.Model
         /// <summary>
         /// Korong bedobása a megadott oszlopba.
         /// </summary>
-        /// <param name="oszlop">Az oszlop indexe, ahova a bábu kerül.</param>
+        /// <param name="oszlop">Az oszlop indexe, ahova az X vagy O kerül.</param>
         public void DropToken(Int32 oszlop)
         {
+            if (_table == null) { return; }
             if (isGameOver)
                 return;
 
             try
             {
+                
+               
                 Int32 sor = _table.EmptySpot(oszlop);
                 if (sor == -1)
                     return; // ha tele van az oszlop
@@ -192,8 +203,8 @@ namespace Potyogós_amőba.Model
             _table = await _dataAccess.LoadAsync(path);
             _currentPlayer = Field.PlayerX;
             _steps = 0;
-            _PlayerTimeX = 0;
-            _PlayerTimeO = 0;
+            _PlayerTimeX = _table.PlayerStartTimeX;
+            _PlayerTimeO = _table.PlayerStartTimeO;
             _timer.Start();
         }
 
@@ -203,11 +214,11 @@ namespace Potyogós_amőba.Model
         /// <param name="table">A játék tábla objektum.</param>
         /// <param name="jatekIdoX">X játékos ideje.</param>
         /// <param name="jatekIdoO">O játékos ideje.</param>
-        public void LoadTableAndTimes(PotyogosTable table, int jatekIdoX, int jatekIdoO)
+        public void LoadTableAndTimes(PotyogosTable table)
         {
             _table = table;
-            _PlayerTimeX = jatekIdoX;
-            _PlayerTimeO = jatekIdoO;
+            _PlayerTimeX = table.PlayerStartTimeX;
+            _PlayerTimeO = table.PlayerStartTimeX;
             _currentPlayer = Field.PlayerX;
             _timer.Start();
             OnGameRefresh();

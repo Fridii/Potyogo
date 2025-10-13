@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Potyogós_amőba.Persistence
 {
+    
     public class PotyogosFileDataAccess : IPotyogosDataAccess
     {
         public async Task<PotyogosTable> LoadAsync(String path)
@@ -20,7 +21,7 @@ namespace Potyogós_amőba.Persistence
                     int gameTimeO = Int32.Parse(times[1]);
                     string line = await reader.ReadLineAsync() ?? String.Empty;
                     Int32 boardSize = Int32.Parse(line); // read the size of the board
-                    PotyogosTable table = new PotyogosTable(boardSize); // create the board
+                    PotyogosTable table = new PotyogosTable(boardSize, gameTimeX, gameTimeO); // create the board
                     String[] values;
                     for (Int32 i = 0; i < boardSize; i++)
                     {

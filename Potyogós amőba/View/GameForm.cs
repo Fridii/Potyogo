@@ -312,8 +312,8 @@ namespace Potyogós_amőba
             }
 
             // időcímkék frissítése (ha vannak)
-            _playerTimers[0].Text = "X: ";
-            _playerTimers[1].Text = "O: ";
+            _playerTimers[0].Text = "X: "+ TimeSpan.FromSeconds(_gameModel.PlayerTimeX).ToString(@"mm\:ss"); 
+            _playerTimers[1].Text = "O: " + TimeSpan.FromSeconds(_gameModel.PlayerTimeX).ToString(@"mm\:ss"); 
         }
 
         /// <summary>

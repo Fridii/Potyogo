@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Potyogós_amőba.Persistence
 {
+
     #region Enums
 
     /// <summary>
@@ -22,7 +23,7 @@ namespace Potyogós_amőba.Persistence
         /// <summary>O játékos mezője.</summary>
         PlayerO = 2
     }
-
+   
     #endregion
 
     /// <summary>
@@ -33,6 +34,8 @@ namespace Potyogós_amőba.Persistence
         #region Fields
 
         private Field[,] tableOfValues;
+        private int StartTimeX;
+        private int StartTimeO;
 
         #endregion
 
@@ -61,6 +64,22 @@ namespace Potyogós_amőba.Persistence
         }
 
         /// <summary>
+        /// Az X játékos kezdeti ideje.
+        /// </summary>
+        public Int32 PlayerStartTimeX
+        {
+            get { return StartTimeX; }
+        }
+        
+        /// <summary>
+        /// Az O játékos kezdeti ideje.
+        /// </summary>
+        public Int32 PlayerStartTimeO
+        {
+            get { return StartTimeO; }
+        }
+
+        /// <summary>
         /// Indexelő, amely visszaadja az adott mező értékét.
         /// </summary>
         /// <param name="x">Sor index.</param>
@@ -78,9 +97,13 @@ namespace Potyogós_amőba.Persistence
         /// Potyogós tábla létrehozása adott mérettel.
         /// </summary>
         /// <param name="meret">A tábla mérete (n x n).</param>
-        public PotyogosTable(Int32 meret)
+        /// <param name="startTimeX">Az X jatékos kezdeti ideje.</param>
+        /// <param name="startTimeO">Az O jatékos kezdeti ideje.</param>
+        public PotyogosTable(Int32 meret, Int32 startTimeX, Int32 startTimeO)
         {
-            tableOfValues = new Field[meret, meret];
+            tableOfValues = new Field[meret, meret]; 
+            StartTimeX = startTimeX;
+            StartTimeO = startTimeO;
         }
 
         #endregion
