@@ -55,14 +55,14 @@ namespace Potyogós_amőba
 
             if (!isPaused)
             {
-                // játék fut → most állítsuk le
+                // játék fut most állítsuk le
                 _gameModel.PauseGame();
                 menu.Text = "Folytatás";
                 menu.Tag = true;
             }
             else
             {
-                // játék szünetel → most indítsuk újra
+                // játék szünetel most indítsuk újra
                 _gameModel.ResumeGame();
                 menu.Text = "Játék szüneteltetése";
                 menu.Tag = false;

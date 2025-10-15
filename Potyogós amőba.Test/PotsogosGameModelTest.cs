@@ -92,6 +92,41 @@ namespace Potyogós_amőba.Test
             _model.DropToken(y);
             Assert.AreEqual(_model[x+1,y], Field.PlayerO);// továbbra is az O kell jojjon mert a 10. lépés helytelen volt (teli oszlop)
         }
+        [TestMethod]
+        public void PotyogosStepNumberTest()
+        {
+            _model.NewGame(6);
+            Assert.AreEqual(0, _model.Steps);
+            Int32 k = 0;
+            for (Int32 i = 0; i < 3; i++)
+                for (Int32 j = 0; j < 6; j++)
+                {
+                    _model.DropToken(j);
+                    k++;
+                    Assert.AreEqual(k, _model.Steps); // lépésszám megfelelő-e
+                }
+        }
+        [TestMethod]
+        public void PotyogosGameWonTest()
+        {
+            _model.NewGame(6);
+           
+            bool eventRaised = false;
+            _model.GameOver += delegate (object? sender, PotyogosEventArgs e)
+            {
+                eventRaised = true;
+                Assert.IsTrue(e.CurrantPlayer == Field.PlayerX); // a megfelelő játékos győzött-e
+            };
+
+            for (Int32 i = 0; i < 3; i++)
+                for (Int32 j = 0; j < 6; j++)
+                {
+                    _model.DropToken(j);
+                }
+            _model.DropToken(0); // ezzel a lépéssel nyer X
+
+            Assert.IsTrue(eventRaised); // kiváltottuk-e az eseményt
+        }
 
         [TestMethod]
         public void PotyogosGameModelGameRefresh()
@@ -101,11 +136,11 @@ namespace Potyogós_amőba.Test
             Int32 time = _model.PlayerTimeX;
             while (time<10)
             {
-                _mockedTimer.RaiseElapsed();
+                _mockedTimer.RaiseElapsed(); //kézzel kiváltja az időzítő eseményét, így nem kell valódi időt várni
 
                 time++;
 
-                Assert.AreEqual(time, _model.PlayerTimeX); // az idő csökkent
+                Assert.AreEqual(time, _model.PlayerTimeX); //az idő nőtt
                 Assert.AreEqual(Field.PlayerX, _model.CurrentPlayer); // de a játékos nem változott
                 Assert.AreEqual(0, _model.PlayerTimeO); // másik játékos ideje nem változott
             }
@@ -116,10 +151,10 @@ namespace Potyogós_amőba.Test
         [TestMethod]
         public async Task PotyogosGameModelLoadTest()
         {
-            // kezdünk egy új játékot
+            
             _model.NewGame(9);
 
-            // majd betöltünk egy játékot
+            // betöltünk egy játékot
             await _model.LoadGameAsync(String.Empty);
 
             for (Int32 i = 0; i < 3; i++)
@@ -140,14 +175,13 @@ namespace Potyogós_amőba.Test
 
         private void Model_GameRefresh(Object? sender, PotyogosEventArgs e)
         {
-            Assert.AreEqual(e.CurrantPlayer, _model.CurrentPlayer); // a két értéknek egyeznie kell
+            Assert.AreEqual(e.CurrantPlayer, _model.CurrentPlayer); 
             Assert.AreEqual(e.GameTime, _model.CurrentPlayer==Field.PlayerX ? _model.PlayerTimeX : _model.PlayerTimeO); // a két értéknek egyeznie kell
        
         }
 
         private void Model_GameOver(Object? sender, PotyogosEventArgs e)
         {
-            _model.NewGame(9);
             Assert.IsTrue(_model.isGameOver); // biztosan vége van a játéknak
             
         }

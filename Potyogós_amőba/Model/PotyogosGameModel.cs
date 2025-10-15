@@ -51,7 +51,7 @@ namespace Potyogós_amőba.Model
         /// A tábla méretét adja vissza.
         /// </summary>
         public Int32 TableSize => _table.Size;
-        
+
         /// <summary>
         /// Az aktuális játékost adja vissza.
         /// </summary>
@@ -79,13 +79,10 @@ namespace Potyogós_amőba.Model
         /// </summary>
         public int PlayerTimeO => _PlayerTimeO;
 
-        public PotyogosFieldEventArgs PotyogosFieldEventArgs
-        {
-            get => default;
-            set
-            {
-            }
-        }
+        /// <summary>
+        /// A lépések száma.
+        public int Steps => _steps;
+
 
         #endregion
 
@@ -133,7 +130,7 @@ namespace Potyogós_amőba.Model
         /// <param name="meret">A tábla mérete.</param>
         public void NewGame(int meret)
         {
-            _table = new PotyogosTable(meret,0,0);
+            _table = new PotyogosTable(meret, 0, 0);
             _currentPlayer = Field.PlayerX;
             _steps = 0;
             _PlayerTimeX = 0;
@@ -153,8 +150,8 @@ namespace Potyogós_amőba.Model
 
             try
             {
-                
-               
+
+
                 Int32 sor = _table.EmptySpot(oszlop);
                 if (sor == -1)
                     return; // ha tele van az oszlop
@@ -357,10 +354,10 @@ namespace Potyogós_amőba.Model
         private List<(int X, int Y)> CheckWin(int sor, int oszlop)
         {
             var directions = new (int dSor, int dOszlop)[] {
-                (0, 1),
-                (1, 0),
-                (1, 1),
-                (1, -1)
+                (0, 1),  // vízszintesen
+                (1, 0),  // függőlegesen
+                (1, 1),  // átlósan
+                (1, -1)  // átlósan
             };
 
             foreach (var (dSor, dOszlop) in directions)
